@@ -39,7 +39,7 @@ class TrainConfig:
     # model params
     hidden_dim: int = 256
     num_critics: int = 10
-    num_agents: int = 10
+    num_agents: int = 20
     gamma: float = 0.99
     tau: float = 5e-3
     actor_learning_rate: float = 3e-4
@@ -61,16 +61,16 @@ class TrainConfig:
     seed: int = 0
     # train_seed: int = 0
     # eval_seed: int = 0
-    log_every: int = 100
+    log_every: int = 500
     device: str = "cuda"
 
     def __post_init__(self):
-        self.name = f"{self.name}-{self.env_name}-{str(uuid.uuid4())[:8]}"
+        self.name = f"{self.name}-{self.env_name}-{self.seed}-{str(uuid.uuid4())[:4]}"
         if self.checkpoints_path is not None:
             self.checkpoints_path = os.path.join(self.checkpoints_path, self.name)
 
 
-# general utils
+# general utils.
 TensorBatch = List[torch.Tensor]
 
 
@@ -83,10 +83,10 @@ def wandb_init(config: dict) -> None:
     wandb.init(
         config=config,
         project=config["project"],
-        group=config["group"],
-        name=config["name"],
+        # name=f"{config['env_name']}_{config['task_data_type']}_{config['task_train_num']}_{config['seed']}",
         id=str(uuid.uuid4()),
     )
+    
     wandb.run.save()
 
 
