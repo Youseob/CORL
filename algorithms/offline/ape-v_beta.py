@@ -39,7 +39,7 @@ class TrainConfig:
     # model params
     hidden_dim: int = 256
     num_critics: int = 10
-    num_agents: int = 20
+    num_agents: int = 10
     gamma: float = 0.99
     tau: float = 5e-3
     actor_learning_rate: float = 3e-4
