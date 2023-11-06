@@ -34,12 +34,12 @@ class TrainConfig:
     env_name: str = "halfcheetah-medium-v2" # Hopper-v3
     task_data_type: str = "low"
     task_train_num: int = 100
-    data_dir: str = None
+    data_dir: str = "/input"
     diri: float = 0.01
     # model params
     hidden_dim: int = 256
-    num_critics: int =
-    num_agents: int = 20
+    num_critics: int = 10
+    num_agents: int = 10
     gamma: float = 0.99
     tau: float = 5e-3
     actor_learning_rate: float = 3e-4
@@ -53,13 +53,14 @@ class TrainConfig:
     num_updates_on_epoch: int = 1000
     normalize_reward: bool = False
     # evaluation params
-    eval_episodes: int = 5
-    eval_every: int = 10
+    eval_episodes: int = 10
+    eval_every: int = 20
     # general params
     checkpoints_path: Optional[str] = None
     deterministic_torch: bool = False
-    train_seed: int = 0
-    eval_seed: int = 0
+    seed: int = 0
+    # train_seed: int = 0
+    # eval_seed: int = 0
     log_every: int = 100
     device: str = "cuda"
 
@@ -571,15 +572,15 @@ def modify_reward(dataset, env_name, max_episode_steps=1000):
 @pyrallis.wrap()
 def train(config: TrainConfig):
     print(config)
-    set_seed(config.train_seed, deterministic_torch=config.deterministic_torch)
+    set_seed(config.seed, deterministic_torch=config.deterministic_torch)
     wandb_init(asdict(config))
 
     # data, evaluation, env setup
     if config.env_name in ["Hopper-v3", "Walker2d-v3", "HalfCheetah-v3"]:
         import neorl
         env = neorl.make(config.env_name)
-        # train, val = env.get_dataset(data_type=config.task_data_type, train_num=config.task_train_num, need_val=False, path=config.data_dir)
-        train, val = env.get_dataset(data_type=config.task_data_type, train_num=config.task_train_num, need_val=False)
+        train, val = env.get_dataset(data_type=config.task_data_type, train_num=config.task_train_num, need_val=False, path=config.data_dir)
+        # train, val = env.get_dataset(data_type=config.task_data_type, train_num=config.task_train_num, need_val=False)
         dataset = dict()
         dataset['observations'] = train['obs'].copy() 
         dataset['actions'] = train['action'].copy()
@@ -658,7 +659,7 @@ def train(config: TrainConfig):
                 actor=actor,
                 apev=trainer,
                 n_episodes=config.eval_episodes,
-                seed=config.eval_seed,
+                seed=config.seed,
                 device=config.device,
             )
             eval_log = {
